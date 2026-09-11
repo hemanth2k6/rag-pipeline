@@ -25,6 +25,7 @@ class Document(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=True)
     source_url = Column(String, nullable=True)
+    status = Column(String, default="pending")
 
     # Relationship to chunks
     chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan")
@@ -37,8 +38,8 @@ class DocumentChunk(Base):
     document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
     text_content = Column(Text, nullable=False)
     
-    # pgvector Vector column with dimension 1536 (e.g. for OpenAI embeddings)
-    embedding = Column(Vector(1536))
+    # pgvector Vector column with dimension 768 (e.g. for Gemini models/text-embedding-004)
+    embedding = Column(Vector(768))
 
     document = relationship("Document", back_populates="chunks")
 
@@ -50,6 +51,8 @@ async def run_migrations():
     """
     print("Running migrations...")
     async with engine.begin() as conn:
+        # Drop all tables first since we are recreating schema in this greenfield project
+        await conn.run_sync(Base.metadata.drop_all)
         # Create all tables defined in Base.metadata
         await conn.run_sync(Base.metadata.create_all)
     print("Migrations completed successfully.")

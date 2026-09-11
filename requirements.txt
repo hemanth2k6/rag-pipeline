@@ -1,3 +1,13 @@
 sqlalchemy[asyncio]>=2.0.0
 asyncpg>=0.29.0
 pgvector>=0.2.4
+fastapi
+uvicorn[standard]
+python-multipart
+celery
+redis
+langchain
+langchain-community
+langchain-google-genai
+pypdf
+python-dotenv
