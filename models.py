@@ -1,5 +1,5 @@
 import asyncio
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Index
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
@@ -43,6 +43,11 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks")
 
+# Create HNSW index for cosine distance
+Index('hnsw_index_for_cosine', DocumentChunk.embedding,
+      postgresql_using='hnsw',
+      postgresql_with={'m': 16, 'ef_construction': 64},
+      postgresql_ops={'embedding': 'vector_cosine_ops'})
 
 async def run_migrations():
     """
