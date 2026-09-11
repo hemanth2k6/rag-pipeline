@@ -15,6 +15,8 @@ app = FastAPI(title="RAG Pipeline API")
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+from sqlalchemy import select
+
 # Pydantic model for the ask request
 class AskRequest(BaseModel):
     question: str
@@ -22,6 +24,23 @@ class AskRequest(BaseModel):
 
 # Initialize the Gemini Chat Model
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+@app.get("/documents/{document_id}")
+async def get_document_status(document_id: int):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Document).where(Document.id == document_id))
+        document = result.scalar_one_or_none()
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+        return {
+            "id": document.id,
+            "title": document.title,
+            "status": document.status
+        }
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
