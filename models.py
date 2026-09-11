@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
 
 # Connection string for asyncpg
-DATABASE_URL = "postgresql+asyncpg://rag_user:rag_password@localhost:5432/rag_db"
+DATABASE_URL = "postgresql+asyncpg://rag_user:rag_password@localhost:5433/rag_db"
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=True)
