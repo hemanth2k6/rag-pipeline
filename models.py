@@ -1,0 +1,59 @@
+import asyncio
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base, relationship
+from pgvector.sqlalchemy import Vector
+
+# Connection string for asyncpg
+DATABASE_URL = "postgresql+asyncpg://rag_user:rag_password@localhost:5432/rag_db"
+
+# Create async engine
+engine = create_async_engine(DATABASE_URL, echo=True)
+
+# Create async sessionmaker
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+Base = declarative_base()
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=True)
+    source_url = Column(String, nullable=True)
+
+    # Relationship to chunks
+    chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan")
+
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
+    text_content = Column(Text, nullable=False)
+    
+    # pgvector Vector column with dimension 1536 (e.g. for OpenAI embeddings)
+    embedding = Column(Vector(1536))
+
+    document = relationship("Document", back_populates="chunks")
+
+
+async def run_migrations():
+    """
+    Initialize the database and run migrations (create tables).
+    Assumes the pgvector extension is already created in the DB.
+    """
+    print("Running migrations...")
+    async with engine.begin() as conn:
+        # Create all tables defined in Base.metadata
+        await conn.run_sync(Base.metadata.create_all)
+    print("Migrations completed successfully.")
+
+if __name__ == "__main__":
+    # Execute the migration script if this file is run directly
+    asyncio.run(run_migrations())
