@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Initialize Celery app
-# Assuming Redis is running on localhost:6379 as per docker-compose
+redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 celery = Celery(
     'rag_worker',
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/0'
+    broker=redis_url,
+    backend=redis_url
 )
 
 async def _process_document_async(doc_id: int, file_path: str):

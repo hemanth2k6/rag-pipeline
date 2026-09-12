@@ -1,11 +1,19 @@
+import os
 import asyncio
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Index
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Connection string for asyncpg
-DATABASE_URL = "postgresql+asyncpg://rag_user:rag_password@localhost:5433/rag_db"
+raw_db_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://rag_user:rag_password@localhost:5433/rag_db")
+if raw_db_url.startswith("postgresql://"):
+    DATABASE_URL = raw_db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+else:
+    DATABASE_URL = raw_db_url
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=True)

@@ -21,5 +21,34 @@ services:
       - "6379:6379"
     restart: always
 
+  api:
+    build: .
+    container_name: rag_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://rag_user:rag_password@db:5432/rag_db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./uploads:/app/uploads
+
+  worker:
+    build: .
+    container_name: rag_worker
+    command: celery -A worker.celery worker --loglevel=info
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://rag_user:rag_password@db:5432/rag_db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./uploads:/app/uploads
+
 volumes:
   postgres_data:
