@@ -61,24 +61,32 @@ graph TD
 ## ⚙️ Local Setup
 
 ### Prerequisites
+- Git
 - Docker and Docker Compose
 - Node.js (v18+) and npm
 - A Google Gemini API Key
 
-### 1. Environment Configuration
+### 1. Clone the Repository
+Start by cloning the repository to your local machine:
+```bash
+git clone https://github.com/hemanth2k6/rag-pipeline.git
+cd rag-pipeline
+```
+
+### 2. Environment Configuration
 Create a `.env` file in the root directory:
 ```env
 GOOGLE_API_KEY=your_gemini_api_key_here
 ```
 
-### 2. Start the Backend Stack
+### 3. Start the Backend Stack
 Run the following command to start PostgreSQL, Redis, FastAPI, and the Celery worker:
 ```bash
 docker compose up -d --build
 ```
 *Note: The first run will automatically run database migrations and create the schema.*
 
-### 3. Start the Frontend
+### 4. Start the Frontend
 In a new terminal, navigate to the frontend directory and start the dev server:
 ```bash
 cd frontend
@@ -93,3 +101,11 @@ The application will be accessible at `http://localhost:5173`.
 - `POST /upload`: Accepts a multipart/form-data file and dispatches a Celery task. Returns a tracking `document_id`.
 - `GET /document/{document_id}`: Polls the processing status of a document (`pending`, `completed`, `failed`).
 - `POST /ask`: Accepts a JSON payload `{"question": "..."}` and returns the LLM-generated answer alongside source citations.
+
+## 📸 Screenshots
+
+### Upload Page
+![Upload Interface](images/image.png)
+
+### Chat Interface
+![Chat Interface](images/image1.png)
