@@ -33,7 +33,7 @@ class AskRequest(BaseModel):
     top_k: int = 5
 
 # Initialize the Gemini Chat Model
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
+llm = ChatGoogleGenerativeAI(model="gemini-3.8-flash", temperature=0)
 
 @app.get("/health")
 async def health_check():
@@ -114,8 +114,19 @@ async def ask_question(request: AskRequest):
     # 4. Invoke LLM
     response = llm.invoke(messages)
 
+    # Handle if response.content is a list (some Gemini models return structured blocks)
+    answer_text = ""
+    if isinstance(response.content, list):
+        for block in response.content:
+            if isinstance(block, dict) and "text" in block:
+                answer_text += block["text"]
+            elif isinstance(block, str):
+                answer_text += block
+    else:
+        answer_text = str(response.content)
+
     return {
-        "answer": response.content,
+        "answer": answer_text,
         "citations": chunk_ids
     }
 
