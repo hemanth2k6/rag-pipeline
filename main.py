@@ -9,8 +9,18 @@ from worker import process_document_task
 from retrieval import search_similar_chunks
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="RAG Pipeline API")
+
+# Add CORS Middleware to allow React frontend to connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, replace with frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
