@@ -51,7 +51,7 @@ async def _process_document_async(doc_id: int, file_path: str):
 
         # 3. Generate embeddings
         # Ensure GOOGLE_API_KEY is present in the environment (.env)
-        embeddings_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+        embeddings_model = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2")
         texts = [chunk.page_content for chunk in chunks]
         
         # Batch embed all chunks
@@ -100,6 +100,9 @@ async def _process_document_async(doc_id: int, file_path: str):
                     await session.commit()
         except Exception as db_e:
             logger.error(f"Failed to update document status to failed for {doc_id}: {str(db_e)}")
+    finally:
+        from models import engine
+        await engine.dispose()
 
 
 @celery.task(name='process_document_task')
