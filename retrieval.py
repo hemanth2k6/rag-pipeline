@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Use the same Gemini model as the ingestion worker
-embeddings_model = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+embeddings_model = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2")
 
 async def search_similar_chunks(query: str, top_k: int = 5):
     """

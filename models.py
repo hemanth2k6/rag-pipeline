@@ -46,16 +46,10 @@ class DocumentChunk(Base):
     document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
     text_content = Column(Text, nullable=False)
     
-    # pgvector Vector column with dimension 768 (e.g. for Gemini models/text-embedding-004)
-    embedding = Column(Vector(768))
+    # pgvector Vector column with dimension 3072 for models/gemini-embedding-2
+    embedding = Column(Vector(3072))
 
     document = relationship("Document", back_populates="chunks")
-
-# Create HNSW index for cosine distance
-Index('hnsw_index_for_cosine', DocumentChunk.embedding,
-      postgresql_using='hnsw',
-      postgresql_with={'m': 16, 'ef_construction': 64},
-      postgresql_ops={'embedding': 'vector_cosine_ops'})
 
 async def run_migrations():
     """
